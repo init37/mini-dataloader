@@ -1,29 +1,34 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from random import shuffle
 
 
-class Sampler[K](ABC):
+class BatchSampler[K](ABC):
     @abstractmethod
-    def __iter__(self) -> Iterator[K]: ...
+    def __iter__(self) -> Iterator[list[K]]: ...
     @abstractmethod
     def __len__(self) -> int: ...
 
 
-class DefaultSampler(Sampler[list[int]]):
+class DefaultSampler[K](BatchSampler[K]):
     def __init__(
-        self, indicies: list[int], shuffle: bool = False, batch_size: int = 1
+        self,
+        indices: Sequence[K],
+        shuffle: bool = False,
+        batch_size: int = 1,
     ) -> None:
-        self.indicies = indicies
+        self.indices = list(indices)
         self.shuffle = shuffle
         self.batch_size = batch_size
+        if batch_size <= 0:
+            raise ValueError("batch_size must be greater than 0")
 
     def __len__(self) -> int:
-        return (len(self.indicies) + self.batch_size - 1) // self.batch_size
+        return (len(self.indices) + self.batch_size - 1) // self.batch_size
 
-    def __iter__(self) -> Iterator[list[int]]:
-        indicies = self.indicies.copy()
+    def __iter__(self) -> Iterator[list[K]]:
+        indices = self.indices.copy()
         if self.shuffle:
-            shuffle(indicies)
-        for i in range(0, len(self.indicies), self.batch_size):
-            yield indicies[i : i + self.batch_size]
+            shuffle(indices)
+        for i in range(0, len(indices), self.batch_size):
+            yield indices[i : i + self.batch_size]

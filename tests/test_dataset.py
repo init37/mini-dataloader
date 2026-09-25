@@ -27,6 +27,9 @@ def test_concrete_dataset_works():
         def __len__(self) -> int:
             return len(self.values)
 
+        def keys(self) -> list[int]:
+            return list(range(len(self.values)))
+
     ds = BasicDataset(["a", "b", "c"])
     assert ds[0] == "a"
     assert len(ds) == 3
