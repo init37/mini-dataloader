@@ -1,4 +1,5 @@
 import pytest
+import torch
 
 from data.dataset import Dataset
 
@@ -9,7 +10,7 @@ def test_dataset_is_abstract():
 
 
 def test_dataset_requires_implementation():
-    class BrokenDataset(Dataset[int, str]):
+    class BrokenDataset(Dataset[int]):
         pass
 
     with pytest.raises(TypeError):
@@ -17,11 +18,11 @@ def test_dataset_requires_implementation():
 
 
 def test_concrete_dataset_works():
-    class BasicDataset(Dataset[int, str]):
-        def __init__(self, values: list[str]):
+    class BasicDataset(Dataset[int]):
+        def __init__(self, values: list[torch.Tensor]):
             self.values = values
 
-        def __getitem__(self, index: int) -> str:
+        def __getitem__(self, index: int) -> torch.Tensor:
             return self.values[index]
 
         def __len__(self) -> int:
@@ -30,6 +31,6 @@ def test_concrete_dataset_works():
         def keys(self) -> list[int]:
             return list(range(len(self.values)))
 
-    ds = BasicDataset(["a", "b", "c"])
-    assert ds[0] == "a"
+    ds = BasicDataset([torch.tensor([1]), torch.tensor([2]), torch.tensor([3])])
+    assert ds[0] == torch.tensor([1])
     assert len(ds) == 3
