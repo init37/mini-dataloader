@@ -1,36 +1,71 @@
 import pytest
 import torch
 
-from data.dataset import Dataset
+from mini_dataloader.data.dataset import FashionMNISTDataset
 
 
-def test_dataset_is_abstract():
-    with pytest.raises(TypeError):
-        Dataset()  # pyright: ignore[reportAbstractUsage]
+# Fixture for creating a FashionMNISTDataset instance
+@pytest.fixture
+def create_fashion_mnist_dataset():
+    X = torch.rand(10, 28, 28)
+    y = torch.randint(0, 10, (10,))
+    return FashionMNISTDataset(X, y)
 
 
-def test_dataset_requires_implementation():
-    class BrokenDataset(Dataset[int]):
-        pass
+# Test cases for Dataset class
+@pytest.mark.parametrize("index", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+def test_dataset_getitem(create_fashion_mnist_dataset, index):
+    dataset = create_fashion_mnist_dataset
+    item = dataset.__getitem__(index)
+    assert isinstance(item, tuple)
+    assert isinstance(item[0], torch.Tensor)
+    assert isinstance(item[1], torch.Tensor)
+    assert item[0].shape == (28, 28)
+    assert item[1].shape == ()
 
-    with pytest.raises(TypeError):
-        BrokenDataset()  # pyright: ignore[reportAbstractUsage]
+
+def test_dataset_len(create_fashion_mnist_dataset):
+    dataset = create_fashion_mnist_dataset
+    assert len(dataset) == 10
 
 
-def test_concrete_dataset_works():
-    class BasicDataset(Dataset[int]):
-        def __init__(self, values: list[torch.Tensor]):
-            self.values = values
+def test_dataset_keys(create_fashion_mnist_dataset):
+    dataset = create_fashion_mnist_dataset
+    keys = dataset.keys()
+    assert isinstance(keys, list)
+    assert all(isinstance(k, int) for k in keys)
+    assert len(keys) == 10
 
-        def __getitem__(self, index: int) -> torch.Tensor:
-            return self.values[index]
 
-        def __len__(self) -> int:
-            return len(self.values)
+# Test cases for FashionMNISTDataset class
+def test_fashion_mnist_dataset_init():
+    X = torch.rand(10, 28, 28)
+    y = torch.randint(0, 10, (10,))
+    dataset = FashionMNISTDataset(X, y)
+    assert isinstance(dataset.X, torch.Tensor)
+    assert isinstance(dataset.y, torch.Tensor)
+    assert dataset.X.shape == (10, 28, 28)
+    assert dataset.y.shape == (10,)
 
-        def keys(self) -> list[int]:
-            return list(range(len(self.values)))
 
-    ds = BasicDataset([torch.tensor([1]), torch.tensor([2]), torch.tensor([3])])
-    assert ds[0] == torch.tensor([1])
-    assert len(ds) == 3
+def test_fashion_mnist_dataset_getitem(create_fashion_mnist_dataset):
+    dataset = create_fashion_mnist_dataset
+    item = dataset.__getitem__(0)
+    assert isinstance(item, tuple)
+    assert isinstance(item[0], torch.Tensor)
+    assert isinstance(item[1], torch.Tensor)
+    assert item[0].shape == (28, 28)
+    assert item[1].shape == ()
+
+
+def test_fashion_mnist_dataset_len(create_fashion_mnist_dataset):
+    dataset = create_fashion_mnist_dataset
+    assert len(dataset) == 10
+
+
+def test_fashion_mnist_dataset_keys(create_fashion_mnist_dataset):
+    dataset = create_fashion_mnist_dataset
+    keys = dataset.keys()
+    assert isinstance(keys, list)
+    assert all(isinstance(k, int) for k in keys)
+    assert len(keys) == 10

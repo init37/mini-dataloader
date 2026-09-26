@@ -7,3 +7,4 @@ class TrainingConfig:
     batch_size: int = 8
     epochs: int = 50
     device: str = "cuda"
+    shuffle: bool = True

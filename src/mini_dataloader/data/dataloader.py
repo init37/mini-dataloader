@@ -27,9 +27,10 @@ class DataLoader[K: Hashable]:
                 batch_size=self.batch_size,
             )
 
-    def __iter__(self) -> Iterator[torch.Tensor]:
+    def __iter__(self) -> Iterator[tuple[torch.Tensor, torch.Tensor]]:
         for keys in self.sampler:
-            yield torch.stack([self.dataset[key] for key in keys])
+            indices = torch.tensor(keys)
+            yield (self.dataset.X[indices], self.dataset.y[indices])
 
     def __len__(self) -> int:
         return len(self.sampler)
