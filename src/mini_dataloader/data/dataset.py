@@ -35,12 +35,16 @@ class FashionMNISTDataset(Dataset[int]):
 
 
 def datasetFactory(name: str, train: bool) -> Dataset:
+    if not isinstance(train, bool):
+        raise TypeError("train must be a boolean value")
+
+    if name.lower() != "fashion":
+        raise ValueError(f"Unsupported dataset name: {name}")
+
     transform = torchvision.transforms.ToTensor()
-    if name.lower() == "fashion":
-        temp_set = torchvision.datasets.FashionMNIST(
-            "./db", train=train, transform=transform, download=True
-        )
-        X = torch.stack([image for image, _ in temp_set])
-        y = torch.stack([label for _, label in temp_set])
-        ds = FashionMNISTDataset(X, y)
-    return ds
+    temp_set = torchvision.datasets.FashionMNIST(
+        "./db", train=train, transform=transform, download=True
+    )
+    X = torch.stack([image for image, _ in temp_set])
+    y = torch.stack([label for _, label in temp_set])
+    return FashionMNISTDataset(X, y)
