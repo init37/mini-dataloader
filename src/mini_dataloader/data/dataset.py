@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Hashable, Sequence
 
 import torch
+import torchvision
 
 
 class Dataset[K: Hashable](ABC):
@@ -31,3 +32,15 @@ class FashionMNISTDataset(Dataset[int]):
 
     def keys(self) -> list[int]:
         return list(range(len(self)))
+
+
+def datasetFactory(name: str, train: bool) -> Dataset:
+    transform = torchvision.transforms.ToTensor()
+    if name.lower() == "fashion":
+        temp_set = torchvision.datasets.FashionMNIST(
+            "./db", train=train, transform=transform, download=True
+        )
+        X = torch.stack([image for image, _ in temp_set])
+        y = torch.stack([label for _, label in temp_set])
+        ds = FashionMNISTDataset(X, y)
+    return ds
