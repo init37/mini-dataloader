@@ -8,8 +8,7 @@ from mini_dataloader.factory.optimizer import optimizerFactory
 from mini_dataloader.trainer import Trainer
 
 train_dataset = datasetFactory("fashion", True)
-train_dataloader = DataLoader(train_dataset)
-
+test_dataset = datasetFactory("fashion", False)
 model = nn.Sequential(
     nn.Conv2d(1, 32, kernel_size=3, padding=1),
     nn.ReLU(),
@@ -23,5 +22,8 @@ model = nn.Sequential(
 config = TrainingConfig()
 optimizer = optimizerFactory(model, config.lr, config.optimizer)
 criterion = criterionFactory(config.criterion)
+train_dataloader = DataLoader(train_dataset, batch_size=config.batch_size)
+test_dataloader = DataLoader(test_dataset)
 trainer = Trainer(config, model, optimizer, criterion)
 trainer.train(train_dataloader)
+trainer.eval(test_dataloader)
