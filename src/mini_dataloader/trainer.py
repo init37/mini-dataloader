@@ -54,6 +54,7 @@ class Trainer:
                 )
                 print(f"Epoch {epoch + 1}: loss={loss:.4f}, Accuracy: {acc:.4f}")
 
+    @timed
     def eval(self, dataloader: DataLoader) -> None:
         total_loss = 0.0
         correct = 0
