@@ -5,6 +5,7 @@ from torch import nn, optim
 
 from mini_dataloader.config.config import TrainingConfig
 from mini_dataloader.data.dataloader import DataLoader
+from mini_dataloader.decorators.timed import timed
 
 
 class Trainer:
@@ -23,6 +24,7 @@ class Trainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
 
+    @timed
     def train_one_epoch(
         self,
         dataloader: DataLoader,
