@@ -8,3 +8,5 @@ class TrainingConfig:
     epochs: int = 50
     device: str = "cuda"
     shuffle: bool = True
+    optimizer: str = "Adam"
+    criterion: str = "CE"

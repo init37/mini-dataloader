@@ -3,6 +3,7 @@ from torch import nn
 from mini_dataloader.config.config import TrainingConfig
 from mini_dataloader.data.dataloader import DataLoader
 from mini_dataloader.data.dataset import datasetFactory
+from mini_dataloader.factory.criterion import criterionFactory
 from mini_dataloader.factory.optimizer import optimizerFactory
 from mini_dataloader.trainer import Trainer
 
@@ -19,7 +20,8 @@ model = nn.Sequential(
     nn.Flatten(),
     nn.Linear(64 * 7 * 7, 10),
 )
-config = TrainingConfig(lr=1e-4, batch_size=8, epochs=10, device="cuda", shuffle=True)
-optimizer = optimizerFactory(model, config.lr, "Adam")
-trainer = Trainer(config, model)
+config = TrainingConfig()
+optimizer = optimizerFactory(model, config.lr, config.optimizer)
+criterion = criterionFactory(config.criterion)
+trainer = Trainer(config, model, optimizer, criterion)
 trainer.train(train_dataloader)
