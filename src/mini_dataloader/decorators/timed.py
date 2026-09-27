@@ -7,10 +7,10 @@ import torch
 
 
 def timed[**P, T](
-    func: Callable[P, T],
-) -> Callable[P, T]:
+    func: Callable[P, tuple[T, T]],
+) -> Callable[P, tuple[T, T]]:
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> T:
+    def wrapper(*args: Any, **kwargs: Any) -> tuple[T, T]:
         start_time = time.perf_counter()
         try:
             result = func(*args, **kwargs)

@@ -5,6 +5,7 @@ from torch import nn, optim
 
 from mini_dataloader.config.config import TrainingConfig
 from mini_dataloader.data.dataloader import DataLoader
+from mini_dataloader.decorators.logged import logged
 from mini_dataloader.decorators.timed import timed
 
 
@@ -24,6 +25,7 @@ class Trainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
 
+    @logged
     @timed
     def train_one_epoch(
         self,
@@ -40,7 +42,7 @@ class Trainer:
             loss = self.criterion(features, targets)
             loss.backward()
             self.optimizer.step()
-            total_loss += loss
+            total_loss += loss.item()
             predictions = features.argmax(dim=1)
             correct += (predictions == targets).sum().item()
             total += targets.size(0)
@@ -48,14 +50,14 @@ class Trainer:
 
     def train(self, dataloader: DataLoader) -> None:
         with TrainingMode(self.model):
-            for epoch in range(self.config.epochs):
-                loss, acc = self.train_one_epoch(
+            for _ in range(self.config.epochs):
+                self.train_one_epoch(
                     dataloader,
                 )
-                print(f"Epoch {epoch + 1}: loss={loss:.4f}, Accuracy: {acc:.4f}")
 
+    @logged
     @timed
-    def eval(self, dataloader: DataLoader) -> None:
+    def eval(self, dataloader: DataLoader) -> tuple[float, float]:
         total_loss = 0.0
         correct = 0
         total = 0
@@ -71,7 +73,7 @@ class Trainer:
                 total += target.size(0)
         acc = correct / total
         loss = total_loss / len(dataloader)
-        print(f"Test set: loss={loss:.4f}, Accuracy: {acc:.4f}")
+        return loss, acc
 
 
 class TrainingMode:
